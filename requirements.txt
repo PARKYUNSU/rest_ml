@@ -46,7 +46,6 @@ pytest==6.2.2
 pytest-flask==1.2.0
 pytest-json-report==1.5.0
 pytest-metadata==2.0.4
-pytest-submit @ git+https://github.com/aib-contents/pytest-submit-plugin@b9969ec966f001718c961a5320c6ebd50458d804
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 pytz==2023.3
