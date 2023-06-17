@@ -1,0 +1,143 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            height: calc(100vh - 20px);
+            width: 100%;
+            position: relative;
+            z-index: 0;
+        }
+        .search-container {
+            position: absolute;
+            top: 0px;
+            left: 45px;
+            width: 435px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            z-index: 1;
+        }
+        h1 {
+            margin-bottom: 5px;
+        }
+        form {
+            margin-bottom: 3px;
+        }
+        input[type="text"] {
+            padding: 5px;
+            width: 100%;
+            font-size: 14px;
+        }
+        button {
+            padding: 5px 10px;
+        }
+        .result {
+            margin-bottom: 2px;
+            font-size: 14px;
+            line-height: 0.9;
+        }
+        .result-group {
+            border-bottom: 1px solid #999;
+            margin-bottom: 1px;
+        }
+        .custom-icon .custom-marker {
+            display: inline-block;
+            font-size: 45px;
+            text-align: center;
+            line-height: 1;
+            white-space: nowrap;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="search-container">
+        
+        <form action="/search" method="POST">
+            <div class="input-group">
+                <input type="text" class="form-control" name="place_name" placeholder="검색어를 입력하세요" autofocus>
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">검색</button>
+                </div>
+            </div>
+        </form>
+
+        {% if results %}
+        {% set sliced_results = results[:4] %}
+        {% for result in sliced_results %}
+        <div class="result-group">
+            <div class="result">
+                <strong>{{ result.place_name }}</strong>
+                <p>가게명: <a href="{{ result.map_url }}">{{ result.nm }}</a></p>
+                <p>업태: {{ result.typeOfRest }}</p>
+                <p>방문자리뷰수: {{ result.VisitReviewCount }}</p>
+                <p>별점: {{ result.StarScore }}</p>
+                <p>주소: {{ result.rm }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="result-group">
+            <p>{{ message }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        var map = L.map('map').setView([37.553685, 126.825084], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+        var gangseoMarker = L.marker([37.562750, 126.825675], {
+            icon: L.divIcon({
+                className: 'custom-icon',
+                html: '<div class="custom-marker"><b>강서구</b></div>'
+            })
+        }).addTo(map);
+        
+        var gangseoLayer = L.geoJson(null, {
+            style: {
+                fillColor: '#4285F4',
+                fillOpacity: 0.1,
+                color: '#4285F4',
+                weight: 3
+            }
+        }).addTo(map);
+
+        {% for feature in gangseo_geojson.features %}
+            L.geoJSON({{ feature | tojson }}).addTo(gangseoLayer);
+        {% endfor %}
+
+        var redIcon = L.icon({
+            iconUrl: 'https://cdn.icon-icons.com/icons2/2444/PNG/512/location_map_pin_mark_icon_148684.png',
+            iconSize: [40, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [0, -35]
+        });
+
+        var blueIcon = L.icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [0, -35]
+        });
+
+        {% for result in sliced_results %}
+            {% if loop.index == 1 %}
+                var marker = L.marker([{{ result.lat }}, {{ result.lon }}], {icon: redIcon}).addTo(map);
+            {% else %}
+                var marker = L.marker([{{ result.lat }}, {{ result.lon }}], {icon: blueIcon}).addTo(map);
+            {% endif %}
+            marker.bindPopup('<div style="font-size: 16px; text-align: center;"><strong>{{ result.place_name }}</strong></div><div><a href="{{ result.map_url }}">{{ result.nm }}</a></div>');
+        {% endfor %}
+    </script>
+</body>
+</html>

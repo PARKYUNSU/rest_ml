@@ -1,0 +1,52 @@
+<html>
+<head>
+    <title>Search and Map</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .search-container {
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            z-index: 9999;
+        }
+
+        .search-container .input-group {
+            width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        {{ map | safe }}
+    </div>
+
+    <div class="search-container">
+        <form method="POST" action="/search">
+            <div class="input-group">
+                <input type="text" class="form-control" name="place_name" placeholder="{{ search_placeholder }}" aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">검색</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
