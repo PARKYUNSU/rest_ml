@@ -25,10 +25,10 @@ import json
 
 
 key = 'F1PxsM1TEq%2B32cW6lMNrbv7fcFM4E0M4IhBSl1Q%2B3JJLsQ3K73dxBEnFyC56W0mypxfhyOOCpCIV7RnVERTjpA%3D%3D'
-url = 'https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInDong?divId=signguCd&key=11500&indsLclsCd=I2&numOfRows=1000&pageNo=1&type=xml&serviceKey={}'.format(key)
+url = 'https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInDong?divId=signguCd&key=11500&indsLclsCd=I2&numOfRows=7000&pageNo=1&type=xml&serviceKey={}'.format(key)
 
 page = 1
-total_pages = 3
+total_pages = 6
 
 df_list = []
 
@@ -99,9 +99,9 @@ for i, keyword in enumerate(new_df['keyword'].tolist()):
         # 네이버 지도 시스템은 data-cid에 url 파라미터를 저장해두고 있었습니다.
         # data-cid 번호를 뽑아두었다가 기본 url 템플릿에 넣어 최종적인 url을 완성하면 됩니다.
         
-        #만약 검색 결과가 없다면?
+    #검색결과없을시
     except Exception as e1:
-        if "li:nth-child(1)" in str(e1):  # -> "child(1)이 없던데요?"
+        if "li:nth-child(1)" in str(e1): 
             try:
                 new_df.iloc[i,-1] = driver.find_element_by_css_selector("#ct > div.search_listview._content._ctList > ul > li:nth-child(1) > div.item_info > a.a_item.a_item_distance._linkSiteview").get_attribute('data-cid')
                 time.sleep(1)
@@ -212,17 +212,18 @@ new_df = new_df.loc[~(new_df['typeOfRest'].str.contains('null'))]
 #별점 평균, 수 같은 데이터 역시 스트링 타입으로 크롤링이 되었으므로 numeric으로 바꿔줍니다.
 new_df[['VisitReviewCount', 'StarScore', 'BlogReviewCount']] = new_df[['VisitReviewCount', 'StarScore', 'BlogReviewCount']].replace(',', '', regex=True).apply(pd.to_numeric)
 
+new_df = new_df.drop_duplicates()
 #df to json
 json_data = new_df.to_json(orient='records')
 
-conn = sqlite3.connect('project4.db')
+conn = sqlite3.connect('project4_1.db')
 cur = conn.cursor()
 
 # 데이터베이스에 테이블이 없는 경우에만 테이블 생성
 create_table_query = """
     CREATE TABLE IF NOT EXISTS new_df (
         nm TEXT,
-        rm TEXT,
+        rm TEXT, 
         inds TEXT,
         sm TEXT,
         dm TEXT,

@@ -1,7 +1,6 @@
 #deepleaning
 import pandas as pd
 import numpy as np
-import joblib
 import sqlite3
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
